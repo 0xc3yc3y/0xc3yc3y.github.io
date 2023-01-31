@@ -1,6 +1,6 @@
 # 0xc3yc3y ile MuddyWater Analizi
 
-Bugün MuddyWater örneği olan bir XLS dosyası analiz edeceğiz.
+Bu yazımızda MuddyWater örneği olan bir XLS dosyası analiz edeceğiz.
 
 
 MuddyWater APT grubu Orta Doğu, Avrupa, Güney Asya, Afrika ve Amerika'da özel ve devlet kuruluşlarını hedef alan, İran İstihbarat ve Güvenlik Bakanlığı'na bağlı olarak değerledirilen siber casusluk grubudur.
