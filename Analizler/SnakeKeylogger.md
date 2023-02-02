@@ -9,74 +9,74 @@ Snake Keylogger, kurbanın sistemindeki kimlik bilgileri, tuş vuruşları, anl�
 
 Malware Bazaar üzerinden Türkiye etiketli dosyaları filtreleyip rastgele bir dosya seçiyoruz. Farklı anahtar kelimeleri kullanarak da filtreleme yapabilirsiniz.
 
-![malwarebazaar_filtreleme](/0xc3yc3y.github.io/Analizler/img/mwbazaar1.png)
+![malwarebazaar_filtreleme](/Analizler/img/mwbazaar1.png)
 
 Dosya hakkında pek çok bilgi edinebilirsiniz. Farklı ürünlerin çıktıları ve dosyanın tetiklediği YARA kuralları bunlara dahil.
 
-![malwarebazaar_dosya_detayı](/0xc3yc3y.github.io/Analizler/img/mwbazaar2.png)
+![malwarebazaar_dosya_detayı](/Analizler/img/mwbazaar2.png)
 
 Dosyayı indirip analiz ortamımızda ilk önce _pestudio_ aracı ile inceliyoruz. Dosyanın 32-bit olduğunu ve Nullsoft Scriptable Install System (NSIS) yükleyicisi olduğunu görebiliyoruz. NSIS, Windows yükleyicileri oluşturmak için kullanılan, komut dosyası tabanlı bir sistemdir.
 
-![pestudio_1](/0xc3yc3y.github.io/Analizler/img/pestudio1.png)
+![pestudio_1](/Analizler/img/pestudio1.png)
 
 Strings bölümünde kara listede olan stringlerin yanında çarpı işareti bulunmaktadır. Bizim dosyamızın kullandığı API'ların bazılarının kara listede yer aldığı görülüyor. Burada dikkatimizi çekebilecek olan stringlerin altlarını çizdim. Bu API'lara bakarak Temp altına bir dosya oluşturulabileceği, yeni bir proses oluşturulabileceği, çeşitli dosya işlemlerinin yapılabileceği ve pano (clipboard) üzerinde işlemler yapılabileceği sonuçlarını çıkarabiliriz.
 
-![pestudio_2](/0xc3yc3y.github.io/Analizler/img/pestudio2.png)
+![pestudio_2](/Analizler/img/pestudio2.png)
 
 Dosyayı lab ortamımızda çalıştırıp Sysmon üzerinde sistemdeki hareketlerini incelediğimizde **%tmp%** dizini altına **tknjr.nt**, **aqzysylnf.x** ve **zvxmfcypxt.exe** dosyalarının oluşturulduğunu görüyoruz. 
 
-![created_file1](/0xc3yc3y.github.io/Analizler/img/createfile.png)
-![created_file2](/0xc3yc3y.github.io/Analizler/img/createfile2.png)
-![created_file3](/0xc3yc3y.github.io/Analizler/img/createfile3.png)
+![created_file1](/Analizler/img/createfile.png)
+![created_file2](/Analizler/img/createfile2.png)
+![created_file3](/Analizler/img/createfile3.png)
 
-![created_file4](/0xc3yc3y.github.io/Analizler/img/tempfiles.png)
+![created_file4](/Analizler/img/tempfiles.png)
 
 Oluşturulan **zvxmfcypxt.exe** dosyasının, parametre olarak **aqzysylnf.x** dosyasını alarak yürütüldüğünü görüyoruz.
 
-![created_process](/0xc3yc3y.github.io/Analizler/img/createprocess.png)
+![created_process](/Analizler/img/createprocess.png)
 
 Dosya ağ bağlantısı olmadığı takdirde yürütmeyi sonlandırmaktadır. Ağ bağlantısı varsa **checkip.dyndns.org** domainine istek atarak çalıştığı makinenin IP adres bilgisini çekmektedir.
 
-![dns_req](/0xc3yc3y.github.io/Analizler/img/dns_req.png)
-![network_conn](/0xc3yc3y.github.io/Analizler/img/network_conn.png)
+![dns_req](/Analizler/img/dns_req.png)
+![network_conn](/Analizler/img/network_conn.png)
 
-![wireshark](/0xc3yc3y.github.io/Analizler/img/wireshark1.png)
+![wireshark](/Analizler/img/wireshark1.png)
 
 Daha sonra çalışan dosyanın bellek stringlerine bakalım. Burada dosyanın varsa sistemde çalıştırdığı komutları, C2 adresini, C2'ye gönderdiği bilgiler gibi detaylar görebiliriz. Bizim örneğimizde C2 olarak **_telegram_** kullanıldığını, örneğin **Snake Keylogger** olduğunu, sistemden tuş vuruşları, ekran görüntüleri, parolalar gibi bilgilerin çalınmaya çalışılacağını tespit edebiliyoruz.  
 
-![memory_strings1](/0xc3yc3y.github.io/Analizler/img/memory1.png)
+![memory_strings1](/Analizler/img/memory1.png)
 
-![meory_strings2](/0xc3yc3y.github.io/Analizler/img/memory2.png)
+![meory_strings2](/Analizler/img/memory2.png)
 
 Şimdi bu örneği bir de **_x32dbg_** aracı ile inceleyelim.
 
 Debug işlemine başlamadan önce koyacağımız breakpointleri belirlemek için _pestudio_ veya _CFF Explorer_ gibi araçlar yardımıyla dosya tarafından kullanılan API'lara bakabiliriz. Kara listede olan API'lardan önemli bulduklarımıza breakpoint koyalım.
 
-![breakpoints](/0xc3yc3y.github.io/Analizler/img/breakpoints1.png)
+![breakpoints](/Analizler/img/breakpoints1.png)
 
 Dinamik analizimizde **Temp** dizinine dosyalar oluşturulduğunu ve yeni bir proses oluşturulduğunu görmüştük. O halde debug ederken de ilk önce Temp dizininin yolunu istemesi gerekir.
 
-![get_temp_path](/0xc3yc3y.github.io/Analizler/img/get_temp_path.png)
+![get_temp_path](/Analizler/img/get_temp_path.png)
 
 Temp dizinine ilk olarak **nss4911.tmp** isimli bir geçici dosya oluşturulmaktadır. Bu dosya proses terminate olduğunda yok olacak. (Geçici dosyanın ismi her seferinde değişmektedir.)
 
-![create_temp_file](/0xc3yc3y.github.io/Analizler/img/create_tmp_file.png)
+![create_temp_file](/Analizler/img/create_tmp_file.png)
 
 Sonra **tknjr.nt** dosyasının oluşturulduğunu görüyoruz.
 
-![create_tknjr_file](/0xc3yc3y.github.io/Analizler/img/create_tknjr_file.png)
+![create_tknjr_file](/Analizler/img/create_tknjr_file.png)
 
 Oluşturulan bu iki dosyanın içerisine ana prosesten alınan bilgiler yazılmaktadır. (ReadFile -> WriteFile API'ları kullanılmaktadır.) Bir dizi okuma-yazma işleminden sonra **aqzysylnf.x** dosyası oluşturulup yine ana prosesten alınan bilgiler bu dosya içerisine yazılmaktadır.
 
-![create_aqzysylnf_file](/0xc3yc3y.github.io/Analizler/img/create_aqzysylnf_file1.png)
+![create_aqzysylnf_file](/Analizler/img/create_aqzysylnf_file1.png)
 
 Son olarak **zvxmfcypxt.exe** dosyası oluşturulup içerisine ana prosesten alınan bilgiler yazılmaktadır.
 
-![create_executable_file](/0xc3yc3y.github.io/Analizler/img/create_executable_file1.png)
+![create_executable_file](/Analizler/img/create_executable_file1.png)
 
 Bütün dosyalar oluşturulduktan sonra sıra yeni bir proses oluşturmaya geliyor. 
 
-![create_process](/0xc3yc3y.github.io/Analizler/img/creating_process.png)
+![create_process](/Analizler/img/creating_process.png)
 
 Bu fonksiyon içerisine girip ilerlediğimizde Process Injection tekniklerinden biri olan **_Process Hollowing_** tekniğinin kullanıldığını görüyoruz. Bu teknikte:
 
@@ -87,15 +87,15 @@ Bu fonksiyon içerisine girip ilerlediğimizde Process Injection tekniklerinden 
 
 Tekniğin ilk aşaması olan proses oluşturma işlemi için _NtCreateUserProcess_ fonksiyonu kullanılmış. Araştırdığımda bu fonksiyon ile CreateProcess'in aynı olduğunu gördüm. Referanslar kısmına _NtCreateUserProcess_ ve _Process Creation Flags_ için detaylı anlatıma sahip olan linkleri ekliyorum.
 
-![process_hollowing_1](/0xc3yc3y.github.io/Analizler/img/process_hollowing.png)
+![process_hollowing_1](/Analizler/img/process_hollowing.png)
 
 Analize devam ettiğimizde _NtWow64AllocateVirtualMemory64_ ile bellek alanı tahsis edildiğini, _NtWow64WriteVirtualMemory64_ ile de tahsis edilen alana kod yazıldığını görüyoruz.
 
-![process_hollowing_2](/0xc3yc3y.github.io/Analizler/img/process_hollowing1.png)
+![process_hollowing_2](/Analizler/img/process_hollowing1.png)
 
 Yazma işlemi bittikten sonra _Suspended_ modda olan prosesimizin _NtResumeThread_ ile yürütüldüğünü göreceğiz. 
 
-![process_hollowing_3](/0xc3yc3y.github.io/Analizler/img/process_hollowing2.png)
+![process_hollowing_3](/Analizler/img/process_hollowing2.png)
 
 Yeni proses yürütülmeye başlandığı zaman ana proses terminate olmaktadır ve analizimiz burada sona ermektedir. (Aslında zvxmfcypxt.exe'yi de debug edebiliriz ama yazmaya üşendim yalan yok :) Benzer adımlar içeriyordu)
 
