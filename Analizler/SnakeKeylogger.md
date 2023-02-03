@@ -1,6 +1,6 @@
 # 0xc3yc3y ile Snake Keylogger Analizi
 
-Merhaba :) Bu kez masum görünen "hesaphareketi-01.PDF.exe" ismiyle sistemdeki bilgileri acımasızca çalan Snake Keylogger örneğini inceleyeceğiz.
+Merhaba :) Bu kez masum görünen "hesaphareketi-01.PDF.exe" ismiyle, sistemdeki bilgileri acımasızca çalan Snake Keylogger örneğini inceleyeceğiz.
 
 Snake Keylogger, kurbanın sistemindeki kimlik bilgileri, tuş vuruşları, anlık ekran görüntüleri ve pano (clipboard) verileri gibi hassas bilgileri çalmak amacıyla yazılmış zararlı yazılımdır. Genellikle kurbanlara gönderilen maillerde bulunan dosya ekleri aracılığıyla bulaşma başlatılır.
 
@@ -19,7 +19,7 @@ Dosyayı indirip analiz ortamımızda ilk önce _pestudio_ aracı ile inceliyoru
 
 ![pestudio_1](/Analizler/img/pestudio1.png)
 
-Strings bölümünde kara listede olan stringlerin yanında çarpı işareti bulunmaktadır. Bizim dosyamızın kullandığı API'ların bazılarının kara listede yer aldığı görülüyor. Burada dikkatimizi çekebilecek olan stringlerin altlarını çizdim. Bu API'lara bakarak Temp altına bir dosya oluşturulabileceği, yeni bir proses oluşturulabileceği, çeşitli dosya işlemlerinin yapılabileceği ve pano (clipboard) üzerinde işlemler yapılabileceği sonuçlarını çıkarabiliriz.
+Strings bölümünde kara listede olan stringlerin yanında çarpı işareti bulunmaktadır. Bizim dosyamızın kullandığı API'ların bazılarının kara listede yer aldığı görülüyor. Burada dikkatimizi çekebilecek olan stringlerin altlarını çizdim. Bu API'lara bakarak Temp dizini altına bir dosya oluşturulabileceği, yeni bir proses oluşturulabileceği, çeşitli dosya işlemlerinin yapılabileceği ve pano (clipboard) üzerinde işlemler yapılabileceği sonuçlarını çıkarabiliriz.
 
 ![pestudio_2](/Analizler/img/pestudio2.png)
 
@@ -35,14 +35,14 @@ Oluşturulan **zvxmfcypxt.exe** dosyasının, parametre olarak **aqzysylnf.x** d
 
 ![created_process](/Analizler/img/createprocess.png)
 
-Dosya ağ bağlantısı olmadığı takdirde yürütmeyi sonlandırmaktadır. Ağ bağlantısı varsa **checkip.dyndns.org** domainine istek atarak çalıştığı makinenin IP adres bilgisini çekmektedir.
+Dosya, cihazın ağ bağlantısının olmamaması durumunda yürütmeyi sonlandırmaktadır. Ağ bağlantısı varsa **checkip.dyndns.org** domainine istek atarak çalıştığı makinenin IP adres bilgisini çekmektedir.
 
 ![dns_req](/Analizler/img/dns_req.png)
 ![network_conn](/Analizler/img/network_conn.png)
 
 ![wireshark](/Analizler/img/wireshark1.png)
 
-Daha sonra çalışan dosyanın bellek stringlerine bakalım. Burada dosyanın varsa sistemde çalıştırdığı komutları, C2 adresini, C2'ye gönderdiği bilgiler gibi detaylar görebiliriz. Bizim örneğimizde C2 olarak **_telegram_** kullanıldığını, örneğin **Snake Keylogger** olduğunu, sistemden tuş vuruşları, ekran görüntüleri, parolalar gibi bilgilerin çalınmaya çalışılacağını tespit edebiliyoruz.  
+Bir de çalışan dosyanın bellek stringlerine bakalım. Burada dosyanın varsa sistemde çalıştırdığı komutları, C2 adresini, C2'ye gönderdiği bilgiler gibi detaylar görebiliriz. Bizim örneğimizde C2 olarak **_telegram_** kullanıldığını, dosyanın **Snake Keylogger** örneği olduğunu, sistemden tuş vuruşları, ekran görüntüleri, parolalar gibi bilgilerin çalınmaya çalışılacağını tespit edebiliyoruz.  
 
 ![memory_strings1](/Analizler/img/memory1.png)
 
@@ -50,11 +50,11 @@ Daha sonra çalışan dosyanın bellek stringlerine bakalım. Burada dosyanın v
 
 Şimdi bu örneği bir de **_x32dbg_** aracı ile inceleyelim.
 
-Debug işlemine başlamadan önce koyacağımız breakpointleri belirlemek için _pestudio_ veya _CFF Explorer_ gibi araçlar yardımıyla dosya tarafından kullanılan API'lara bakabiliriz. Kara listede olan API'lardan önemli bulduklarımıza breakpoint koyalım.
+Debug işlemine başlamadan önce koyacağımız breakpointleri belirlemek için _pestudio_ veya _CFF Explorer_ gibi araçlar yardımıyla dosya tarafından kullanılan API'lara bakabiliriz. Kara listede olan API'lardan önemli bulduklarımıza breakpoint koyalım. (Analiz sırasında da ekleme çıkarma yapabiliriz.)
 
 ![breakpoints](/Analizler/img/breakpoints1.png)
 
-Dinamik analizimizde **Temp** dizinine dosyalar oluşturulduğunu ve yeni bir proses oluşturulduğunu görmüştük. O halde debug ederken de ilk önce Temp dizininin yolunu istemesi gerekir.
+Dinamik analizimizde **Temp** dizinine dosyalar oluşturulduğunu ve yeni bir proses oluşturulduğunu görmüştük. O halde debug ederken de ilk önce Temp dizininin yolunu istemesini bekleyeceğiz.
 
 ![get_temp_path](/Analizler/img/get_temp_path.png)
 
@@ -78,14 +78,14 @@ Bütün dosyalar oluşturulduktan sonra sıra yeni bir proses oluşturmaya geliy
 
 ![create_process](/Analizler/img/creating_process.png)
 
-Bu fonksiyon içerisine girip ilerlediğimizde Process Injection tekniklerinden biri olan **_Process Hollowing_** tekniğinin kullanıldığını görüyoruz. Bu teknikte:
+Bu fonksiyon içerisine girip (F7 ile) ilerlediğimizde Process Injection tekniklerinden biri olan **_Process Hollowing_** tekniğinin kullanıldığını görüyoruz. Bu teknikte:
 
 *   "Suspended" bayrağı ile bir proses oluşturulur.
 *   Oluşturulan prosesin belleğine yazılacak kod için alan tahsis edilir.
 *   Tahsis edilen bellek alanına zararlı kod yazılır.
 *   Proses yürütülür.
 
-Tekniğin ilk aşaması olan proses oluşturma işlemi için _NtCreateUserProcess_ fonksiyonu kullanılmış. Araştırdığımda bu fonksiyon ile CreateProcess'in aynı olduğunu gördüm. Referanslar kısmına _NtCreateUserProcess_ ve _Process Creation Flags_ için detaylı anlatıma sahip olan linkleri ekliyorum.
+Tekniğin ilk aşaması olan proses oluşturma işlemi için _NtCreateUserProcess_ fonksiyonu kullanılmış. Araştırdığımda bu fonksiyon ile _CreateProcess_'in aynı olduğunu gördüm. Referanslar kısmına _NtCreateUserProcess_ ve _Process Creation Flags_ için detaylı anlatıma sahip olan linkleri ekliyorum.
 
 ![process_hollowing_1](/Analizler/img/process_hollowing.png)
 
